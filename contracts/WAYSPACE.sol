@@ -3,8 +3,9 @@ pragma solidity ^0.8.15;
 
 import "erc721a/contracts/ERC721A.sol";
 import "./PuzzleTime.sol";
+import "./AlbumMetadata.sol";
 
-contract WAYSPACE is ERC721A, PuzzleTime {
+contract WAYSPACE is ERC721A, PuzzleTime, AlbumMetadata {
     /// @notice Price for Single
     uint256 public singlePrice = 22200000000000000;
     /// @notice Price for Single
@@ -13,7 +14,9 @@ contract WAYSPACE is ERC721A, PuzzleTime {
     /// @notice Wrong price for purchase
     error Purchase_WrongPrice(uint256 correctPrice);
 
-    constructor() ERC721A("WAYSPACE", "JACKIE") {}
+    constructor(string[] memory _musicMetadata) ERC721A("WAYSPACE", "JACKIE") {
+        setupAlbumMetadata(_musicMetadata);
+    }
 
     /// @notice This allows the user to purchase a edition edition
     /// at the given price in the contract.
@@ -55,7 +58,6 @@ contract WAYSPACE is ERC721A, PuzzleTime {
     {
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
-        return
-            "ipfs://bafyreicngdorfolbpfqlqg5lmjyvgiosspdq7cz34l5zaystkdeajsljfi/metadata.json";
+        return songURI(tokenId);
     }
 }
