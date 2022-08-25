@@ -1,13 +1,7 @@
-# Sample Hardhat Project
+# WAYSPACE
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+- the 12-piece puzzle by Jackintheway
 
-Try running some of the following tasks:
+### Metadata
 
-```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+- [Welcome Home](https://ipfs.io/ipfs/bafyreicngdorfolbpfqlqg5lmjyvgiosspdq7cz34l5zaystkdeajsljfi/metadata.json)
