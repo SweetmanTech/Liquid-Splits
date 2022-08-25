@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 
 import "erc721a/contracts/ERC721A.sol";
-import "./interfaces/IPuzzleDrop.sol";
+import "../interfaces/IPuzzleDrop.sol";
 
 contract PuzzleDrop is ERC721A, IPuzzleDrop {
     /// @notice Price for Single

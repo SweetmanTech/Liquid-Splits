@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "./PuzzleDrop.sol";
-import "./AlbumMetadata.sol";
+import "./lib/PuzzleDrop.sol";
+import "./lib/AlbumMetadata.sol";
 
 contract WAYSPACE is AlbumMetadata, PuzzleDrop {
     constructor(string[] memory _musicMetadata)
@@ -47,18 +47,17 @@ contract WAYSPACE is AlbumMetadata, PuzzleDrop {
         onlyValidSongId(_songId)
         returns (uint256)
     {
+        uint256 start = _nextTokenId();
         _mint(msg.sender, quantity);
-        _setSongURI(_nextTokenId(), quantity, _songId);
-        uint256 lastMintedTokenId = _nextTokenId() - 1;
-        uint256 firstMintedTokenId = lastMintedTokenId - quantity;
+        _setSongURI(start, quantity, _songId);
 
         emit Sale({
             to: msg.sender,
             quantity: quantity,
             pricePerToken: bundlePrice,
-            firstPurchasedTokenId: firstMintedTokenId
+            firstPurchasedTokenId: start
         });
-        return firstMintedTokenId;
+        return start;
     }
 
     /// @notice Returns the Uniform Resource Identifier (URI) for `tokenId` token.

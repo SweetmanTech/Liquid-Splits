@@ -39,7 +39,7 @@ contract AlbumMetadata {
     }
 
     modifier onlyValidSongId(uint8 _songId) {
-        require(bytes(songURI(_songId)).length == 0, "song does not exist");
+        require(bytes(songURI(_songId)).length > 0, "song does not exist");
         _;
     }
 }
