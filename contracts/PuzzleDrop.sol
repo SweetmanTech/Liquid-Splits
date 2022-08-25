@@ -33,6 +33,15 @@ contract PuzzleDrop is ERC721A, IPuzzleDrop {
     }
 
     /// @notice Public sale active
+    modifier onlyValidPrice(uint256 _price, uint256 _quantity) {
+        if (msg.value != _price * _quantity) {
+            revert Purchase_WrongPrice(_price * _quantity);
+        }
+
+        _;
+    }
+
+    /// @notice Public sale active
     function _publicSaleActive() internal view returns (bool) {
         return
             publicSaleStart <= block.timestamp &&

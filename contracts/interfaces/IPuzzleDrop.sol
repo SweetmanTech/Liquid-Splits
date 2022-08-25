@@ -26,4 +26,16 @@ interface IPuzzleDrop {
         // The total supply available
         uint256 maxSupply;
     }
+
+    /// @notice Event emitted for each sale
+    /// @param to address sale was made to
+    /// @param quantity quantity of the minted nfts
+    /// @param pricePerToken price for each token
+    /// @param firstPurchasedTokenId first purchased token ID (to get range add to quantity for max)
+    event Sale(
+        address indexed to,
+        uint256 indexed quantity,
+        uint256 indexed pricePerToken,
+        uint256 firstPurchasedTokenId
+    );
 }
