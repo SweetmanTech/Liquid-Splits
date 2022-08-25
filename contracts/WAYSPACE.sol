@@ -1,48 +1,63 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "erc721a/contracts/ERC721A.sol";
-import "./PuzzleTime.sol";
+import "./lib/PuzzleDrop.sol";
+import "./lib/AlbumMetadata.sol";
 
-contract WAYSPACE is ERC721A, PuzzleTime {
-    /// @notice Price for Single
-    uint256 public singlePrice = 22200000000000000;
-    /// @notice Price for Single
-    uint256 public bundlePrice = 33300000000000000;
-
-    /// @notice Wrong price for purchase
-    error Purchase_WrongPrice(uint256 correctPrice);
-
-    constructor() ERC721A("WAYSPACE", "JACKIE") {}
+contract WAYSPACE is AlbumMetadata, PuzzleDrop {
+    constructor(string[] memory _musicMetadata)
+        PuzzleDrop("WAYSPACE", "JACKIE")
+    {
+        setupAlbumMetadata(_musicMetadata);
+    }
 
     /// @notice This allows the user to purchase a edition edition
     /// at the given price in the contract.
-    function purchase(uint256 quantity)
+    function purchase(uint256 _quantity, uint8 _songId)
         external
         payable
         onlyPublicSaleActive
+        onlyValidPrice(singlePrice, _quantity)
         returns (uint256)
     {
-        if (msg.value != singlePrice * quantity) {
-            revert Purchase_WrongPrice(singlePrice * quantity);
-        }
-
-        _mint(msg.sender, quantity);
-        // uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        // emit IERC721Drop.Sale({
-        //     to: _msgSender(),
-        //     quantity: quantity,
-        //     pricePerToken: salePrice,
-        //     firstPurchasedTokenId: firstMintedTokenId
-        // });
-        // return firstMintedTokenId;
-        return 1;
+        uint256 firstMintedTokenId = _purchase(_quantity, _songId);
+        return firstMintedTokenId;
     }
 
-    /// @notice Returns the starting token ID.
-    function _startTokenId() internal pure override returns (uint256) {
-        return 1;
+    /// @notice This allows the user to purchase a edition edition
+    /// at the given price in the contract.
+    function purchaseBundle(uint256 _quantity)
+        external
+        payable
+        onlyPublicSaleActive
+        onlyValidPrice(bundlePrice, _quantity)
+        returns (uint256)
+    {
+        uint8 songIdOne = 1;
+        uint8 songIdTwo = 2;
+        _purchase(_quantity, songIdOne);
+        uint256 firstMintedTokenId = _purchase(_quantity, songIdTwo);
+        return firstMintedTokenId;
+    }
+
+    /// @notice This allows the user to purchase a edition edition
+    /// at the given price in the contract.
+    function _purchase(uint256 quantity, uint8 _songId)
+        internal
+        onlyValidSongId(_songId)
+        returns (uint256)
+    {
+        uint256 start = _nextTokenId();
+        _mint(msg.sender, quantity);
+        _setSongURI(start, quantity, _songId);
+
+        emit Sale({
+            to: msg.sender,
+            quantity: quantity,
+            pricePerToken: bundlePrice,
+            firstPurchasedTokenId: start
+        });
+        return start;
     }
 
     /// @notice Returns the Uniform Resource Identifier (URI) for `tokenId` token.
@@ -55,7 +70,7 @@ contract WAYSPACE is ERC721A, PuzzleTime {
     {
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
-        return
-            "ipfs://bafyreicngdorfolbpfqlqg5lmjyvgiosspdq7cz34l5zaystkdeajsljfi/metadata.json";
+        uint8 songId = songIds[tokenId];
+        return songURI(songId);
     }
 }
