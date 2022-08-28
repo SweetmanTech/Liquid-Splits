@@ -13,14 +13,14 @@ contract WAYSPACE is AlbumMetadata, PuzzleDrop {
 
     /// @notice This allows the user to purchase a edition edition
     /// at the given price in the contract.
-    function purchase(uint256 _quantity, uint8 _songId)
+    function purchase(uint256 _quantity)
         external
         payable
         onlyPublicSaleActive
         onlyValidPrice(singlePrice, _quantity)
         returns (uint256)
     {
-        uint256 firstMintedTokenId = _purchase(_quantity, _songId);
+        uint256 firstMintedTokenId = _purchase(_quantity, 1);
         return firstMintedTokenId;
     }
 
