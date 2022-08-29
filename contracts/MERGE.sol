@@ -4,10 +4,10 @@ pragma solidity ^0.8.15;
 import "./lib/PuzzleDrop.sol";
 import "./lib/AlbumMetadata.sol";
 
-contract WAYSPACE is AlbumMetadata, PuzzleDrop {
-    constructor(string[] memory _musicMetadata)
-        PuzzleDrop("WAYSPACE", "JACKIE")
-    {
+contract MERGE is AlbumMetadata, PuzzleDrop {
+    uint256 immutable MERGE_TTD = 58750000000000000000000;
+
+    constructor(string[] memory _musicMetadata) PuzzleDrop("The Merge", "SAD") {
         setupAlbumMetadata(_musicMetadata);
     }
 
@@ -21,22 +21,6 @@ contract WAYSPACE is AlbumMetadata, PuzzleDrop {
         returns (uint256)
     {
         uint256 firstMintedTokenId = _purchase(_quantity, 1);
-        return firstMintedTokenId;
-    }
-
-    /// @notice This allows the user to purchase a edition edition
-    /// at the given price in the contract.
-    function purchaseBundle(uint256 _quantity)
-        external
-        payable
-        onlyPublicSaleActive
-        onlyValidPrice(bundlePrice, _quantity)
-        returns (uint256)
-    {
-        uint8 songIdOne = 1;
-        uint8 songIdTwo = 2;
-        _purchase(_quantity, songIdOne);
-        uint256 firstMintedTokenId = _purchase(_quantity, songIdTwo);
         return firstMintedTokenId;
     }
 
@@ -69,8 +53,26 @@ contract WAYSPACE is AlbumMetadata, PuzzleDrop {
         returns (string memory)
     {
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        uint8 songId = songIds[tokenId];
+        uint8 songId = currentSong();
         return songURI(songId);
+    }
+
+    /// @notice Returns current song URI based on TheMergeTTD.
+    function currentSong() public view returns (uint8) {
+        return uint8(block.timestamp % songCount) + 1;
+    }
+
+    /// @notice Returns if the merge has occured.
+    function isMerged() public view returns (bool) {
+        return block.difficulty > MERGE_TTD;
+    }
+
+    /// @notice Current price. Changes once the merge happens.
+    function price() public view returns (uint256) {
+        if (!isMerged()) {
+            return MERGE_TTD / 1000000;
+        } else {
+            return 100000000000000000; //TODO: develop mechanism to set post-merge price
+        }
     }
 }
