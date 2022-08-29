@@ -6,6 +6,8 @@ contract AlbumMetadata {
     mapping(uint256 => uint8) internal songIds;
     /// @notice mapping from songId to songMetadataURI
     mapping(uint8 => string) internal songURIs;
+    /// @notice number of songs in Album
+    uint8 public songCount;
 
     /// @notice Returns the Uniform Resource Identifier (URI) for `tokenId` token.
     function songURI(uint8 _songId) public view returns (string memory) {
@@ -36,6 +38,7 @@ contract AlbumMetadata {
                 songURIs[i] = _musicMetadata[i - 1];
             }
         }
+        songCount = uint8(_musicMetadata.length);
     }
 
     /// @notice Valid Song ID
