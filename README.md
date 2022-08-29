@@ -4,10 +4,9 @@
 
 <img width="1056" alt="Screen Shot 2022-08-29 at 11 16 00 AM" src="https://user-images.githubusercontent.com/23249402/187222295-37ad7fe4-193c-4535-91b3-2995e73666fe.png">
 
-
 ### The Originals - SAD
 
-- original tracks from Song A Day collection.
+- original tracks from [Song A Day collection](https://opensea.io/collection/song-a-day).
 
 1. [Lofi FolkSong About EIP 1559](https://opensea.io/assets/0x19b703f65aA7E1E775BD06c2aa0D0d08c80f1C45/4522)
 
@@ -26,6 +25,8 @@
 8. [The Sepolila Merge](https://opensea.io/assets/ethereum/0x19b703f65aa7e1e775bd06c2aa0d0d08c80f1c45/4935)
 
 9. [Smash That Eth (Goerli Merge)](https://opensea.io/assets/ethereum/0x19b703f65aa7e1e775bd06c2aa0d0d08c80f1c45/4971)
+
+10. [Stake From Home](https://opensea.io/assets/ethereum/0x19b703f65aa7e1e775bd06c2aa0d0d08c80f1c45/4985)
 
 ### Metadata
 
@@ -47,6 +48,8 @@
 
 9. [Smash That Eth (Goerli Merge)](https://ipfs.io/ipfs/bafkreiarqh42viuebmiy7jjuzkrxilhuk3mog4vt3zpk4dygb7jgz67kxu)
 
+10. [Stake From Home](https://ipfs.io/ipfs/bafkreienmiicd4zpzxgvkhprmzbv5r5ssmr2k66r7misnuahroxubxh6im)
+
 ### Metadata init string
 
 - for Sweets to use during deployment
@@ -61,7 +64,8 @@
     "ipfs://bafkreihk62zn55rmitrlezckiq5ko3y67dsrusz4ul56mo2lbwrl2he7xu",
     "ipfs://bafkreiflpx76dfo4psu3wgtdxz3kkqynl4bi6tyhcp2tg46zpxvscg3dze",
     "ipfs://bafkreidbrimk4l7r7ck2puj7dczyb2p6d6vqfcrjbrjl2dmcw6pazoo4dq",
-     "ipfs://bafkreiarqh42viuebmiy7jjuzkrxilhuk3mog4vt3zpk4dygb7jgz67kxu"
+    "ipfs://bafkreiarqh42viuebmiy7jjuzkrxilhuk3mog4vt3zpk4dygb7jgz67kxu",
+    "ipfs://bafkreienmiicd4zpzxgvkhprmzbv5r5ssmr2k66r7misnuahroxubxh6im"
 ]
 ```
 
