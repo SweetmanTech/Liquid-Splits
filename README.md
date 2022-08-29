@@ -1,6 +1,6 @@
 # MERGE
 
-- the official album by Song a Day Mann (Jonathan Mann)
+- the official album by [Song a Day](https://songaday.world/) Mann ([Jonathan Mann](https://twitter.com/songadaymann))
 
 <img width="1056" alt="Screen Shot 2022-08-29 at 11 16 00 AM" src="https://user-images.githubusercontent.com/23249402/187222295-37ad7fe4-193c-4535-91b3-2995e73666fe.png">
 
