@@ -1,18 +1,28 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.10;
 
 import "./interfaces/ISplitMain.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract LiquidSplit {
     /// @notice 0xSplits address for split.
     address payable public immutable payoutSplit;
     /// @notice 0xSplits address for updating & distributing split.
     ISplitMain public splitMain;
-    address[] public tempAccounts;
+    /// @notice address of ERC721 contract with controlling tokens.
+    IERC721 public nftContract;
+    /// @notice array of token holders as split recipients.
+    uint32[] public tokenIds;
+    /// @notice array of token holders;
+    address[] public holders;
     /// @notice Funds have been received. activate liquidity.
     event FundsReceived(address indexed source, uint256 amount);
 
-    constructor() {
+    constructor(address _nftContractAddress, uint32[] memory _tokenIds) {
+        /// Establish NFT holder contract
+        nftContract = IERC721(_nftContractAddress);
+        /// Establish tokenIds from NFT contract for split recipients.
+        tokenIds = _tokenIds;
         /// Establish interface to splits contract
         splitMain = ISplitMain(0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE);
         // create dummy mutable split with this contract as controller;
@@ -31,77 +41,13 @@ contract LiquidSplit {
                 address(this)
             )
         );
-
-        tempAccounts = [
-            0x73C1106Ac50eEFF8B69040c95C665e674b850BC3,
-            0xcfBf34d385EA2d5Eb947063b67eA226dcDA3DC38,
-            0xeCF12d2259a30B156Da670031D7a836626C3a89F,
-            0xE5d9ff6303c4d64E00750F5699E56c3520b0df21
-        ];
     }
 
-    //                       ,-.                  ,-.                      ,-.
-    //                       `-'                  `-'                      `-'
-    //                       /|\                  /|\                      /|\
-    //                        |                    |                        |                      ,----------.
-    //                       / \                  / \                      / \                     |ERC721Drop|
-    //                     Caller            payoutSplit            FundsRecipient                `----+-----'
-    //                       |                    |           withdraw()   |                            |
-    //                       | ------------------------------------------------------------------------->
-    //                       |                    |                        |                            |
-    //                       |                    |                        |                            |
-    //          ________________________________________________________________________________________________________
-    //          ! ALT  /  caller is not admin or manager?                  |                            |               !
-    //          !_____/      |                    |                        |                            |               !
-    //          !            |                    revert Access_WithdrawNotAllowed()                    |               !
-    //          !            | <-------------------------------------------------------------------------               !
-    //          !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //          !~[noop]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //                       |                    |                        |                            |
-    //                       |                    |                   send fee amount                   |
-    //                       |                    | <----------------------------------------------------
-    //                       |                    |                        |                            |
-    //                       |                    |                        |                            |
-    //                       |                    |                        |             ____________________________________________________________
-    //                       |                    |                        |             ! ALT  /  send unsuccesful?                                 !
-    //                       |                    |                        |             !_____/        |                                            !
-    //                       |                    |                        |             !              |----.                                       !
-    //                       |                    |                        |             !              |    | revert Withdraw_FundsSendFailure()    !
-    //                       |                    |                        |             !              |<---'                                       !
-    //                       |                    |                        |             !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //                       |                    |                        |             !~[noop]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //                       |                    |                        |                            |
-    //                       |                    |                        | send remaining funds amount|
-    //                       |                    |                        | <---------------------------
-    //                       |                    |                        |                            |
-    //                       |                    |                        |                            |
-    //                       |                    |                        |             ____________________________________________________________
-    //                       |                    |                        |             ! ALT  /  send unsuccesful?                                 !
-    //                       |                    |                        |             !_____/        |                                            !
-    //                       |                    |                        |             !              |----.                                       !
-    //                       |                    |                        |             !              |    | revert Withdraw_FundsSendFailure()    !
-    //                       |                    |                        |             !              |<---'                                       !
-    //                       |                    |                        |             !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //                       |                    |                        |             !~[noop]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-    //                     Caller            payoutSplit            FundsRecipient                ,----+-----.
-    //                       ,-.                  ,-.                      ,-.                     |ERC721Drop|
-    //                       `-'                  `-'                      `-'                     `----------'
-    //                       /|\                  /|\                      /|\
-    //                        |                    |                        |
-    //                       / \                  / \                      / \
     /// @notice distributes ETH to Liquid Split NFT holders
     function withdraw() public {
-        address[] memory unsorted = getAccounts();
+        address[] memory unsorted = getHolders();
         address[] memory accounts = sortAddresses(unsorted);
-        uint32 numRecipients = uint32(accounts.length);
-        uint32[] memory percentAllocations = new uint32[](numRecipients);
-        for (uint256 i = 0; i < numRecipients; ) {
-            percentAllocations[i] = 1e6 / numRecipients;
-            unchecked {
-                ++i;
-            }
-        }
-
+        uint32[] memory percentAllocations = getPercentAllocations(accounts);
         // atomically deposit funds into split, update recipients to reflect current supercharged NFT holders,
         // and distribute
         payoutSplit.transfer(address(this).balance);
@@ -122,8 +68,37 @@ contract LiquidSplit {
     }
 
     /// @notice Returns array of accounts for current liquid split.
-    function getAccounts() public view returns (address[] memory) {
-        return tempAccounts;
+    function getHolders() public view returns (address[] memory) {
+        return holders;
+    }
+
+    /// @notice Returns array of percent allocations for current liquid split.
+    function getPercentAllocations(address[] memory accounts)
+        public
+        pure
+        returns (uint32[] memory)
+    {
+        uint32 numRecipients = uint32(accounts.length);
+        uint32[] memory percentAllocations = new uint32[](numRecipients);
+        for (uint256 i = 0; i < numRecipients; ) {
+            percentAllocations[i] = uint32(1e6 / numRecipients);
+            unchecked {
+                ++i;
+            }
+        }
+        return percentAllocations;
+    }
+
+    /// @notice Returns array of accounts for current liquid split.
+    function updateHolders() public {
+        holders = [nftContract.ownerOf(tokenIds[0])];
+        for (uint256 i = 1; i < tokenIds.length; ) {
+            address holder = nftContract.ownerOf(tokenIds[i]);
+            holders.push(holder);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /// @notice Returns sorted array of accounts for 0xSplits.
