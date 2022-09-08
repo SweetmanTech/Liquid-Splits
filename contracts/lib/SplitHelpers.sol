@@ -13,8 +13,6 @@ contract SplitHelpers {
     IERC721 public nftContract;
     /// @notice array of token holders as split recipients.
     uint32[] public tokenIds;
-    /// @notice array of token holders;
-    address[] public holders;
     /// @notice Funds have been received. activate liquidity.
     event FundsReceived(address indexed source, uint256 amount);
 
@@ -70,20 +68,57 @@ contract SplitHelpers {
         return addresses;
     }
 
+    // /// @notice Returns array of percent allocations for current liquid split.
+    // function getPercentAllocations(address[] memory accounts)
+    //     public
+    //     pure
+    //     returns (uint32[] memory)
+    // {
+    //     uint32 numRecipients = uint32(accounts.length);
+    //     uint32[] memory percentAllocations = new uint32[](numRecipients);
+    //     for (uint256 i = 0; i < numRecipients; ) {
+    //         percentAllocations[i] = uint32(1e6 / numRecipients);
+    //         unchecked {
+    //             ++i;
+    //         }
+    //     }
+    //     return percentAllocations;
+    // }
+
     /// @notice Returns array of percent allocations for current liquid split.
-    function getPercentAllocations(address[] memory accounts)
+    /// @dev sortedAccounts _must_ be sorted for this to work properly
+    function getPercentAllocations(address[] memory sortedAccounts)
         public
         pure
-        returns (uint32[] memory)
+        returns (uint32[] memory percentAllocations)
     {
-        uint32 numRecipients = uint32(accounts.length);
-        uint32[] memory percentAllocations = new uint32[](numRecipients);
-        for (uint256 i = 0; i < numRecipients; ) {
-            percentAllocations[i] = uint32(1e6 / numRecipients);
+        uint32 numRecipients = uint32(sortedAccounts.length);
+        uint32 numUniqRecipients = 0;
+        address lastRecipient = sortedAccounts[0];
+        for (uint256 i = 1; i < numRecipients; ) {
+            if (sortedAccounts[i] != lastRecipient) {
+                unchecked {
+                    ++numUniqRecipients;
+                    lastRecipient = sortedAccounts[i];
+                }
+            }
             unchecked {
                 ++i;
             }
         }
-        return percentAllocations;
+
+        uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
+        for (uint256 i = 0; i < numUniqRecipients; ) {
+            _percentAllocations[i] += uint32(1e6 / numRecipients);
+            unchecked {
+                ++i;
+            }
+        }
+        // TODO: replace 1e6 w PERCENTAGE_SCALE or some similarly named constant in contract
+        _percentAllocations[0] +=
+            1e6 -
+            uint32(1e6 / numRecipients) *
+            numRecipients;
+        return _percentAllocations;
     }
 }

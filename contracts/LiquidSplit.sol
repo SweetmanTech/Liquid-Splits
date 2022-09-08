@@ -16,7 +16,7 @@ contract LiquidSplit is SplitHelpers {
     }
 
     /// @notice distributes ETH to Liquid Split NFT holders
-    function withdraw() public {
+    function withdraw() internal {
         address[] memory unsorted = getHolders();
         address[] memory accounts = sortAddresses(unsorted);
         uint32[] memory percentAllocations = getPercentAllocations(accounts);
