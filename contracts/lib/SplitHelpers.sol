@@ -55,17 +55,19 @@ contract SplitHelpers is PureHelpers {
                 ++i;
             }
         }
-        return _sortAddresses(_holders);
+        _holders = _sortAddresses(_holders);
+        return _uniqueAddresses(_holders);
     }
 
     /// @notice Returns array of percent allocations for current liquid split.
     /// @dev sortedAccounts _must_ be sorted for this to work properly
+    /// @dev sortedAccounts _must_ be unique for this to work properly
     function getPercentAllocations(address[] memory sortedAccounts)
         public
         pure
         returns (uint32[] memory percentAllocations)
     {
-        uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
+        uint32 numUniqRecipients = uint32(sortedAccounts.length);
 
         uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
         for (uint256 i = 0; i < numUniqRecipients; ) {
