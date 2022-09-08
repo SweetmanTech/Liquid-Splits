@@ -3,8 +3,9 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../interfaces/ISplitMain.sol";
+import "./PureHelpers.sol";
 
-contract SplitHelpers {
+contract SplitHelpers is PureHelpers {
     /// @notice 0xSplits address for split.
     address payable public immutable payoutSplit;
     /// @notice 0xSplits address for updating & distributing split.
@@ -41,7 +42,7 @@ contract SplitHelpers {
         );
     }
 
-    /// @notice Returns array of accounts for current liquid split.
+    /// @notice Returns array of sorted accounts for current liquid split.
     function getHolders() public view returns (address[] memory) {
         address[] memory _holders = new address[](tokenIds.length);
         uint256 loopLength = _holders.length;
@@ -51,39 +52,8 @@ contract SplitHelpers {
                 ++i;
             }
         }
-        return _holders;
+        return _sortAddresses(_holders);
     }
-
-    /// @notice Returns sorted array of accounts for 0xSplits.
-    function sortAddresses(address[] memory addresses)
-        public
-        pure
-        returns (address[] memory)
-    {
-        for (uint256 i = addresses.length - 1; i > 0; i--)
-            for (uint256 j = 0; j < i; j++)
-                if (addresses[i] < addresses[j])
-                    (addresses[i], addresses[j]) = (addresses[j], addresses[i]);
-
-        return addresses;
-    }
-
-    // /// @notice Returns array of percent allocations for current liquid split.
-    // function getPercentAllocations(address[] memory accounts)
-    //     public
-    //     pure
-    //     returns (uint32[] memory)
-    // {
-    //     uint32 numRecipients = uint32(accounts.length);
-    //     uint32[] memory percentAllocations = new uint32[](numRecipients);
-    //     for (uint256 i = 0; i < numRecipients; ) {
-    //         percentAllocations[i] = uint32(1e6 / numRecipients);
-    //         unchecked {
-    //             ++i;
-    //         }
-    //     }
-    //     return percentAllocations;
-    // }
 
     /// @notice Returns array of percent allocations for current liquid split.
     /// @dev sortedAccounts _must_ be sorted for this to work properly
@@ -93,19 +63,7 @@ contract SplitHelpers {
         returns (uint32[] memory percentAllocations)
     {
         uint32 numRecipients = uint32(sortedAccounts.length);
-        uint32 numUniqRecipients = 0;
-        address lastRecipient = sortedAccounts[0];
-        for (uint256 i = 1; i < numRecipients; ) {
-            if (sortedAccounts[i] != lastRecipient) {
-                unchecked {
-                    ++numUniqRecipients;
-                    lastRecipient = sortedAccounts[i];
-                }
-            }
-            unchecked {
-                ++i;
-            }
-        }
+        uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
 
         uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
         for (uint256 i = 0; i < numUniqRecipients; ) {

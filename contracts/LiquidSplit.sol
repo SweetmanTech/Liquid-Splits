@@ -17,15 +17,16 @@ contract LiquidSplit is SplitHelpers {
 
     /// @notice distributes ETH to Liquid Split NFT holders
     function withdraw() internal {
-        address[] memory unsorted = getHolders();
-        address[] memory accounts = sortAddresses(unsorted);
-        uint32[] memory percentAllocations = getPercentAllocations(accounts);
+        address[] memory sortedAccounts = getHolders();
+        uint32[] memory percentAllocations = getPercentAllocations(
+            sortedAccounts
+        );
         // atomically deposit funds into split, update recipients to reflect current supercharged NFT holders,
         // and distribute
         payoutSplit.transfer(address(this).balance);
         splitMain.updateAndDistributeETH(
             payoutSplit,
-            accounts,
+            sortedAccounts,
             percentAllocations,
             0,
             address(0)
