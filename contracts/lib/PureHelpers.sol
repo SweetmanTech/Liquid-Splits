@@ -22,7 +22,7 @@ contract PureHelpers {
     /// @notice Returns sorted array of accounts for 0xSplits.
     /// @dev sortedAccounts _must_ be sorted for this to work properly
     function _uniqueAddresses(address[] memory sortedAccounts)
-        public
+        internal
         pure
         returns (address[] memory)
     {
