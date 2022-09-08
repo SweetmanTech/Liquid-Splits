@@ -2,6 +2,11 @@
 
 - the unofficial plugin for the [0xSplits](https://www.0xsplits.xyz/) protocol.
 
+### Known Issues
+
+- tokenIds.length must be safe divisor (ex. 11 tokens will crash).
+- how to handle multiple tokens owned by the same wallet? increase share for individual or raise % for all?
+
 ### Credits
 
 - [0xSplits](https://www.0xsplits.xyz/)
