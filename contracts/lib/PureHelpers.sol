@@ -19,6 +19,31 @@ contract PureHelpers {
         return addresses;
     }
 
+    /// @notice Returns sorted array of accounts for 0xSplits.
+    /// @dev sortedAccounts _must_ be sorted for this to work properly
+    function _uniqueAddresses(address[] memory sortedAccounts)
+        public
+        pure
+        returns (address[] memory)
+    {
+        uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
+        address[] memory _uniqueRecipients = new address[](numUniqRecipients);
+        _uniqueRecipients[0] = sortedAccounts[0];
+        for (uint32 i = 1; i < numUniqRecipients; ) {
+            uint32 j = i;
+            while (_uniqueRecipients[i - 1] == sortedAccounts[j]) {
+                unchecked {
+                    ++j;
+                }
+            }
+            _uniqueRecipients[i] = sortedAccounts[j];
+            unchecked {
+                ++i;
+            }
+        }
+        return _uniqueRecipients;
+    }
+
     /// @notice Returns number of unique recipients.
     /// @dev sortedAccounts _must_ be sorted for this to work properly
     function _countUniqueRecipients(address[] memory sortedAccounts)

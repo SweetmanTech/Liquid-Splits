@@ -14,6 +14,9 @@ contract SplitHelpers is PureHelpers {
     IERC721 public nftContract;
     /// @notice array of token holders as split recipients.
     uint32[] public tokenIds;
+    /// @notice constant to scale uints into percentages (1e6 == 100%)
+    uint32 public constant PERCENTAGE_SCALE = 1e6;
+
     /// @notice Funds have been received. activate liquidity.
     event FundsReceived(address indexed source, uint256 amount);
 
@@ -62,21 +65,21 @@ contract SplitHelpers is PureHelpers {
         pure
         returns (uint32[] memory percentAllocations)
     {
-        uint32 numRecipients = uint32(sortedAccounts.length);
         uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
 
         uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
         for (uint256 i = 0; i < numUniqRecipients; ) {
-            _percentAllocations[i] += uint32(1e6 / numRecipients);
+            _percentAllocations[i] += uint32(
+                PERCENTAGE_SCALE / numUniqRecipients
+            );
             unchecked {
                 ++i;
             }
         }
-        // TODO: replace 1e6 w PERCENTAGE_SCALE or some similarly named constant in contract
         _percentAllocations[0] +=
-            1e6 -
-            uint32(1e6 / numRecipients) *
-            numRecipients;
+            PERCENTAGE_SCALE -
+            uint32(PERCENTAGE_SCALE / numUniqRecipients) *
+            numUniqRecipients;
         return _percentAllocations;
     }
 }

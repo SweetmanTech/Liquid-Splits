@@ -26,7 +26,7 @@ contract LiquidSplit is SplitHelpers {
         payoutSplit.transfer(address(this).balance);
         splitMain.updateAndDistributeETH(
             payoutSplit,
-            sortedAccounts,
+            _uniqueAddresses(sortedAccounts),
             percentAllocations,
             0,
             address(0)
