@@ -1,11 +1,12 @@
 # Liquid Splits
 
-- the unofficial plugin for the [0xSplits](https://www.0xsplits.xyz/) protocol.
+- the unofficial plug-in for the [0xSplits](https://www.0xsplits.xyz/) hyperstructure. 🔌
 
-### Known Issues
+### Features
 
-- tokenIds.length must be safe divisor (ex. 11 tokens will crash).
-- how to handle multiple tokens owned by the same wallet? increase share for individual or raise % for all?
+- bring-your-own-nft. 🌈
+- equitable when one holder owns multiple nfts. 💰
+- supports Zora / OpenSea / 0xSplits / etc. 🍄
 
 ### Credits
 
