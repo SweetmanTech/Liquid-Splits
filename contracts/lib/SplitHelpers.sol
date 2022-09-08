@@ -3,8 +3,9 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../interfaces/ISplitMain.sol";
+import "./PureHelpers.sol";
 
-contract SplitHelpers {
+contract SplitHelpers is PureHelpers {
     /// @notice 0xSplits address for split.
     address payable public immutable payoutSplit;
     /// @notice 0xSplits address for updating & distributing split.
@@ -13,8 +14,9 @@ contract SplitHelpers {
     IERC721 public nftContract;
     /// @notice array of token holders as split recipients.
     uint32[] public tokenIds;
-    /// @notice array of token holders;
-    address[] public holders;
+    /// @notice constant to scale uints into percentages (1e6 == 100%)
+    uint32 public constant PERCENTAGE_SCALE = 1e6;
+
     /// @notice Funds have been received. activate liquidity.
     event FundsReceived(address indexed source, uint256 amount);
 
@@ -43,51 +45,41 @@ contract SplitHelpers {
         );
     }
 
-    /// @notice Returns array of accounts for current liquid split.
+    /// @notice Returns array of sorted accounts for current liquid split.
     function getHolders() public view returns (address[] memory) {
-        return holders;
-    }
-
-    /// @notice Returns array of accounts for current liquid split.
-    function updateHolders() public {
-        holders = [nftContract.ownerOf(tokenIds[0])];
-        for (uint256 i = 1; i < tokenIds.length; ) {
-            address holder = nftContract.ownerOf(tokenIds[i]);
-            holders.push(holder);
+        address[] memory _holders = new address[](tokenIds.length);
+        uint256 loopLength = _holders.length;
+        for (uint256 i = 0; i < loopLength; ) {
+            _holders[i] = nftContract.ownerOf(tokenIds[i]);
             unchecked {
                 ++i;
             }
         }
-    }
-
-    /// @notice Returns sorted array of accounts for 0xSplits.
-    function sortAddresses(address[] memory addresses)
-        public
-        pure
-        returns (address[] memory)
-    {
-        for (uint256 i = addresses.length - 1; i > 0; i--)
-            for (uint256 j = 0; j < i; j++)
-                if (addresses[i] < addresses[j])
-                    (addresses[i], addresses[j]) = (addresses[j], addresses[i]);
-
-        return addresses;
+        return _sortAddresses(_holders);
     }
 
     /// @notice Returns array of percent allocations for current liquid split.
-    function getPercentAllocations(address[] memory accounts)
+    /// @dev sortedAccounts _must_ be sorted for this to work properly
+    function getPercentAllocations(address[] memory sortedAccounts)
         public
         pure
-        returns (uint32[] memory)
+        returns (uint32[] memory percentAllocations)
     {
-        uint32 numRecipients = uint32(accounts.length);
-        uint32[] memory percentAllocations = new uint32[](numRecipients);
-        for (uint256 i = 0; i < numRecipients; ) {
-            percentAllocations[i] = uint32(1e6 / numRecipients);
+        uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
+
+        uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
+        for (uint256 i = 0; i < numUniqRecipients; ) {
+            _percentAllocations[i] += uint32(
+                PERCENTAGE_SCALE / numUniqRecipients
+            );
             unchecked {
                 ++i;
             }
         }
-        return percentAllocations;
+        _percentAllocations[0] +=
+            PERCENTAGE_SCALE -
+            uint32(PERCENTAGE_SCALE / numUniqRecipients) *
+            numUniqRecipients;
+        return _percentAllocations;
     }
 }
