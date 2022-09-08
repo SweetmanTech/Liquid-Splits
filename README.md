@@ -8,6 +8,12 @@
 - equitable when one holder owns multiple nfts. 💰
 - supports Zora / OpenSea / 0xSplits / etc. 🍄
 
+### Example
+
+- example liquid split - [0x44d844D7E63b2D95D85870774A922fd05Ff18d9B](https://mumbai.polygonscan.com/address/0x44d844D7E63b2D95D85870774A922fd05Ff18d9B#code).
+
+<img width="275" alt="Screen Shot 2022-09-04 at 8 59 01 PM" src="https://user-images.githubusercontent.com/23249402/188338555-6c60860d-09cd-4aa5-8f20-5afc6317afce.png">
+
 ### Credits
 
 - [0xSplits](https://www.0xsplits.xyz/)
@@ -20,8 +26,8 @@
 
 ### ThirdWeb Release
 
-1. Visit [MERGE](https://thirdweb.com/sweetman.eth/MERGE) on Thirdweb.
+1. Visit [LiquidSplit](https://thirdweb.com/sweetman.eth/LiquidSplit) on Thirdweb.
 1. Click "Deploy Now" button.
 1. Select any network.
-1. Deploy MERGE.
-1. Use `purchase` to mint on your website.
+1. Deploy LiquidSplit.
+1. Send native gas token (`ETH`/`MATIC`) to use your liquid split.
