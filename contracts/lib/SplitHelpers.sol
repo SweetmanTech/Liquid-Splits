@@ -45,19 +45,15 @@ contract SplitHelpers {
 
     /// @notice Returns array of accounts for current liquid split.
     function getHolders() public view returns (address[] memory) {
-        return holders;
-    }
-
-    /// @notice Returns array of accounts for current liquid split.
-    function updateHolders() public {
-        holders = [nftContract.ownerOf(tokenIds[0])];
-        for (uint256 i = 1; i < tokenIds.length; ) {
-            address holder = nftContract.ownerOf(tokenIds[i]);
-            holders.push(holder);
+        address[] memory _holders = new address[](tokenIds.length);
+        uint256 loopLength = _holders.length;
+        for (uint256 i = 0; i < loopLength; ) {
+            _holders[i] = nftContract.ownerOf(tokenIds[i]);
             unchecked {
                 ++i;
             }
         }
+        return _holders;
     }
 
     /// @notice Returns sorted array of accounts for 0xSplits.
