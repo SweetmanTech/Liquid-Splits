@@ -15,7 +15,7 @@ contract PureHelpersTest is Test, PureHelpers {
     /// correctness tests - basic
     /// -----------------------------------------------------------------------
 
-    function testCan_sortAddresses() pure public {
+    function testCan_sortAddresses() public pure {
         address[] memory randAddresses = new address[](5);
         randAddresses[0] = address(0);
         randAddresses[1] = address(1);
@@ -82,13 +82,13 @@ contract PureHelpersTest is Test, PureHelpers {
     /// helper fns
     /// -----------------------------------------------------------------------
 
-    function genRandAddressArray(bytes32 seed, uint8 len) pure internal returns (address[] memory addresses) {
+    function genRandAddressArray(bytes32 seed, uint8 len) internal pure returns (address[] memory addresses) {
         addresses = new address[](len);
 
         bytes32 _seed = seed;
         for (uint256 i = 0; i < len; i++) {
             _seed = keccak256(abi.encodePacked(_seed));
-            addresses[i] = address(bytes20( _seed ));
+            addresses[i] = address(bytes20(_seed));
         }
     }
 }

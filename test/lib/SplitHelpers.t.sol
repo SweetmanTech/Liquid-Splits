@@ -7,13 +7,12 @@ import "src/interfaces/ISplitMain.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract PureHelpersTest is Test {
-    address constant SPLIT_MAIN = address( 0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE );
-    address constant MOCK_NFT = address( 0x1337 );
+    address constant SPLIT_MAIN = address(0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE);
+    address constant MOCK_NFT = address(0x1337);
     uint32 constant PERCENTAGE_SCALE = 1e6;
     SplitHelpers sh;
 
-    function setUp() public {
-    }
+    function setUp() public {}
 
     /// -----------------------------------------------------------------------
     /// correctness tests
@@ -29,21 +28,17 @@ contract PureHelpersTest is Test {
         for (uint32 i = 0; i < _tokenIds.length; i++) {
             _tokenIds[i] = i;
         }
-        vm.mockCall(
-                    SPLIT_MAIN,
-                    abi.encodeWithSelector(ISplitMain.createSplit.selector),
-                    abi.encode(address(1))
-                    );
+        vm.mockCall(SPLIT_MAIN, abi.encodeWithSelector(ISplitMain.createSplit.selector), abi.encode(address(1)));
         sh = new SplitHelpers(_nftContractAddress, _tokenIds);
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             vm.mockCall(
-                        MOCK_NFT,
-                        abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
-                        abi.encode(address(uint160(_tokenIds.length)))
-                        );
+                MOCK_NFT,
+                abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
+                abi.encode(address(uint160(_tokenIds.length)))
+            );
         }
-        ( address[] memory recipients, uint32[] memory percentAllocations ) = sh.getRecipientsAndAllocations();
+        (address[] memory recipients, uint32[] memory percentAllocations) = sh.getRecipientsAndAllocations();
 
         address[] memory expectedRecipients = new address[](1);
         expectedRecipients[0] = address(uint160(_tokenIds.length));
@@ -62,21 +57,15 @@ contract PureHelpersTest is Test {
         for (uint32 i = 0; i < _tokenIds.length; i++) {
             _tokenIds[i] = i;
         }
-        vm.mockCall(
-                    SPLIT_MAIN,
-                    abi.encodeWithSelector(ISplitMain.createSplit.selector),
-                    abi.encode(address(1))
-                    );
+        vm.mockCall(SPLIT_MAIN, abi.encodeWithSelector(ISplitMain.createSplit.selector), abi.encode(address(1)));
         sh = new SplitHelpers(_nftContractAddress, _tokenIds);
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             vm.mockCall(
-                        MOCK_NFT,
-                        abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
-                        abi.encode(address(uint160(i)))
-                        );
+                MOCK_NFT, abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]), abi.encode(address(uint160(i)))
+            );
         }
-        ( address[] memory recipients, uint32[] memory percentAllocations ) = sh.getRecipientsAndAllocations();
+        (address[] memory recipients, uint32[] memory percentAllocations) = sh.getRecipientsAndAllocations();
 
         address[] memory expectedRecipients = new address[](_tokenIds.length);
         for (uint256 i = 0; i < expectedRecipients.length; i++) {
@@ -109,21 +98,15 @@ contract PureHelpersTest is Test {
         for (uint32 i = 0; i < _tokenIds.length; i++) {
             _tokenIds[i] = i;
         }
-        vm.mockCall(
-                    SPLIT_MAIN,
-                    abi.encodeWithSelector(ISplitMain.createSplit.selector),
-                    abi.encode(address(1))
-                    );
+        vm.mockCall(SPLIT_MAIN, abi.encodeWithSelector(ISplitMain.createSplit.selector), abi.encode(address(1)));
         sh = new SplitHelpers(_nftContractAddress, _tokenIds);
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             vm.mockCall(
-                        MOCK_NFT,
-                        abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
-                        abi.encode(address(uint160(i)))
-                        );
+                MOCK_NFT, abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]), abi.encode(address(uint160(i)))
+            );
         }
-        ( address[] memory recipients, uint32[] memory percentAllocations ) = sh.getRecipientsAndAllocations();
+        (address[] memory recipients, uint32[] memory percentAllocations) = sh.getRecipientsAndAllocations();
 
         address[] memory expectedRecipients = new address[](_tokenIds.length);
         for (uint256 i = 0; i < expectedRecipients.length; i++) {
@@ -148,13 +131,13 @@ contract PureHelpersTest is Test {
     /// helper fns
     /// -----------------------------------------------------------------------
 
-    function genRandAddressArray(bytes32 seed, uint8 len) pure internal returns (address[] memory addresses) {
+    function genRandAddressArray(bytes32 seed, uint8 len) internal pure returns (address[] memory addresses) {
         addresses = new address[](len);
 
         bytes32 _seed = seed;
         for (uint256 i = 0; i < len; i++) {
             _seed = keccak256(abi.encodePacked(_seed));
-            addresses[i] = address(bytes20( _seed ));
+            addresses[i] = address(bytes20(_seed));
         }
     }
 }

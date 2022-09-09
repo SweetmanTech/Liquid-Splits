@@ -35,21 +35,14 @@ contract SplitHelpers is PureHelpers {
         uint32[] memory percentAllocations = new uint32[](2);
         percentAllocations[0] = uint32(500000);
         percentAllocations[1] = uint32(500000);
-        payoutSplit = payable(
-            splitMain.createSplit(
-                recipients,
-                percentAllocations,
-                0,
-                address(this)
-            )
-        );
+        payoutSplit = payable(splitMain.createSplit(recipients, percentAllocations, 0, address(this)));
     }
 
     /// @notice Returns array of all current token holders.
     function getAllHolders() public view returns (address[] memory holders) {
         holders = new address[](tokenIds.length);
         uint256 loopLength = holders.length;
-        for (uint256 i = 0; i < loopLength; ) {
+        for (uint256 i = 0; i < loopLength;) {
             holders[i] = nftContract.ownerOf(tokenIds[i]);
             unchecked {
                 ++i;
@@ -66,19 +59,17 @@ contract SplitHelpers is PureHelpers {
     function getRecipientsAndAllocations()
         public
         view
-        returns ( address[] memory recipients, uint32[] memory percentAllocations )
+        returns (address[] memory recipients, uint32[] memory percentAllocations)
     {
         address[] memory sortedHolders = getSortedHolders();
         uint256 numUniqRecipients = _countUniqueRecipients(sortedHolders);
 
         recipients = new address[](numUniqRecipients);
         percentAllocations = new uint32[](numUniqRecipients);
-        uint32 percentPerToken = uint32(
-                                         PERCENTAGE_SCALE / numUniqRecipients
-                                         );
+        uint32 percentPerToken = uint32(PERCENTAGE_SCALE / numUniqRecipients);
         uint256 lastRecipient = numUniqRecipients - 1;
         uint256 j = 0;
-        for ( uint256 i = 0; i < lastRecipient; ) {
+        for (uint256 i = 0; i < lastRecipient;) {
             recipients[i] = sortedHolders[j];
             while (recipients[i] == sortedHolders[j]) {
                 unchecked {
@@ -92,8 +83,7 @@ contract SplitHelpers is PureHelpers {
         }
         recipients[lastRecipient] = sortedHolders[lastRecipient];
         unchecked {
-            percentAllocations[lastRecipient] = PERCENTAGE_SCALE -
-                uint32( percentPerToken * j );
+            percentAllocations[lastRecipient] = PERCENTAGE_SCALE - uint32(percentPerToken * j);
         }
     }
 }
