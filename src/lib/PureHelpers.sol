@@ -11,10 +11,14 @@ contract PureHelpers {
         pure
         returns (address[] memory)
     {
-        for (uint256 i = addresses.length - 1; i > 0; i--)
-            for (uint256 j = 0; j < i; j++)
-                if (addresses[i] < addresses[j])
-                    (addresses[i], addresses[j]) = (addresses[j], addresses[i]);
+        for (uint256 i = addresses.length - 1; i > 0; ) {
+            for (uint256 j = 0; j < i; ) {
+                    if (addresses[i] < addresses[j])
+                        (addresses[i], addresses[j]) = (addresses[j], addresses[i]);
+                    unchecked { ++j; }
+                }
+            unchecked { --i; }
+        }
 
         return addresses;
     }
@@ -29,8 +33,8 @@ contract PureHelpers {
         uint32 numUniqRecipients = _countUniqueRecipients(sortedAccounts);
         address[] memory _uniqueRecipients = new address[](numUniqRecipients);
         _uniqueRecipients[0] = sortedAccounts[0];
+        uint32 j = 1;
         for (uint32 i = 1; i < numUniqRecipients; ) {
-            uint32 j = i;
             while (_uniqueRecipients[i - 1] == sortedAccounts[j]) {
                 unchecked {
                     ++j;
@@ -39,6 +43,7 @@ contract PureHelpers {
             _uniqueRecipients[i] = sortedAccounts[j];
             unchecked {
                 ++i;
+                ++j;
             }
         }
         return _uniqueRecipients;

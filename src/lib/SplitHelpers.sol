@@ -45,43 +45,55 @@ contract SplitHelpers is PureHelpers {
         );
     }
 
-    /// @notice Returns array of sorted accounts for current liquid split.
-    function getHolders() public view returns (address[] memory) {
-        address[] memory _holders = new address[](tokenIds.length);
-        uint256 loopLength = _holders.length;
+    /// @notice Returns array of all current token holders.
+    function getAllHolders() public view returns (address[] memory holders) {
+        holders = new address[](tokenIds.length);
+        uint256 loopLength = holders.length;
         for (uint256 i = 0; i < loopLength; ) {
-            _holders[i] = nftContract.ownerOf(tokenIds[i]);
+            holders[i] = nftContract.ownerOf(tokenIds[i]);
             unchecked {
                 ++i;
             }
         }
-        _holders = _sortAddresses(_holders);
-        return _uniqueAddresses(_holders);
     }
 
-    /// @notice Returns array of percent allocations for current liquid split.
-    /// @dev sortedAccounts _must_ be sorted for this to work properly
-    /// @dev sortedAccounts _must_ be unique for this to work properly
-    function getPercentAllocations(address[] memory sortedAccounts)
-        public
-        pure
-        returns (uint32[] memory percentAllocations)
-    {
-        uint32 numUniqRecipients = uint32(sortedAccounts.length);
+    /// @notice Returns array of sorted token holders.
+    function getSortedHolders() public view returns (address[] memory holders) {
+        holders = _sortAddresses(getAllHolders());
+    }
 
-        uint32[] memory _percentAllocations = new uint32[](numUniqRecipients);
-        for (uint256 i = 0; i < numUniqRecipients; ) {
-            _percentAllocations[i] += uint32(
-                PERCENTAGE_SCALE / numUniqRecipients
-            );
+    /// @notice Returns array of recipients and array of percent allocations for current liquid split.
+    function getRecipientsAndAllocations()
+        public
+        view
+        returns ( address[] memory recipients, uint32[] memory percentAllocations )
+    {
+        address[] memory sortedHolders = getSortedHolders();
+        uint256 numUniqRecipients = _countUniqueRecipients(sortedHolders);
+
+        recipients = new address[](numUniqRecipients);
+        percentAllocations = new uint32[](numUniqRecipients);
+        uint32 percentPerToken = uint32(
+                                         PERCENTAGE_SCALE / numUniqRecipients
+                                         );
+        uint256 lastRecipient = numUniqRecipients - 1;
+        uint256 j = 0;
+        for ( uint256 i = 0; i < lastRecipient; ) {
+            recipients[i] = sortedHolders[j];
+            while (recipients[i] == sortedHolders[j]) {
+                unchecked {
+                    percentAllocations[i] += percentPerToken;
+                    ++j;
+                }
+            }
             unchecked {
                 ++i;
             }
         }
-        _percentAllocations[0] +=
-            PERCENTAGE_SCALE -
-            uint32(PERCENTAGE_SCALE / numUniqRecipients) *
-            numUniqRecipients;
-        return _percentAllocations;
+        recipients[lastRecipient] = sortedHolders[lastRecipient];
+        unchecked {
+            percentAllocations[lastRecipient] = PERCENTAGE_SCALE -
+                uint32( percentPerToken * j );
+        }
     }
 }
