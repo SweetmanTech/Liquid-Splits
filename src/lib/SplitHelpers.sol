@@ -66,7 +66,7 @@ contract SplitHelpers is PureHelpers {
 
         recipients = new address[](numUniqRecipients);
         percentAllocations = new uint32[](numUniqRecipients);
-        uint32 percentPerToken = uint32(PERCENTAGE_SCALE / numUniqRecipients);
+        uint32 percentPerToken = uint32(PERCENTAGE_SCALE / sortedHolders.length);
         uint256 lastRecipient = numUniqRecipients - 1;
         uint256 j = 0;
         for (uint256 i = 0; i < lastRecipient;) {
@@ -81,7 +81,7 @@ contract SplitHelpers is PureHelpers {
                 ++i;
             }
         }
-        recipients[lastRecipient] = sortedHolders[lastRecipient];
+        recipients[lastRecipient] = sortedHolders[j];
         unchecked {
             percentAllocations[lastRecipient] = PERCENTAGE_SCALE - uint32(percentPerToken * j);
         }

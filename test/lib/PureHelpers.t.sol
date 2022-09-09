@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "src/lib/PureHelpers.sol";
 
 contract PureHelpersTest is Test, PureHelpers {
+    address[] uniqAddresses;
+
     function setUp() public {}
 
     /// -----------------------------------------------------------------------
@@ -38,12 +40,12 @@ contract PureHelpersTest is Test, PureHelpers {
         sortedAddresses[3] = address(2);
         sortedAddresses[4] = address(2);
 
-        address[] memory uniqAddresses = new address[](3);
-        uniqAddresses[0] = address(0);
-        uniqAddresses[1] = address(1);
-        uniqAddresses[2] = address(2);
+        address[] memory _uniqAddresses = new address[](3);
+        _uniqAddresses[0] = address(0);
+        _uniqAddresses[1] = address(1);
+        _uniqAddresses[2] = address(2);
 
-        assertEq(_uniqueAddresses(sortedAddresses), uniqAddresses);
+        assertEq(_uniqueAddresses(sortedAddresses), _uniqAddresses);
     }
 
     function testCan_countUniqueRecipients() public {
@@ -54,9 +56,9 @@ contract PureHelpersTest is Test, PureHelpers {
         sortedAddresses[3] = address(2);
         sortedAddresses[4] = address(2);
 
-        uint256 uniqAddresses = _countUniqueRecipients(sortedAddresses);
+        uint256 numUniq = _countUniqueRecipients(sortedAddresses);
 
-        assertEq(uniqAddresses, 3);
+        assertEq(numUniq, 3);
     }
 
     /// -----------------------------------------------------------------------
@@ -67,15 +69,54 @@ contract PureHelpersTest is Test, PureHelpers {
         vm.assume(len > 1);
 
         address[] memory randAddresses = genRandAddressArray(seed, len);
-
-        emit log_array(randAddresses);
-
         address[] memory sortedAddresses = _sortAddresses(randAddresses);
-        emit log_array(sortedAddresses);
 
         for (uint256 i = 1; i < len; i++) {
             assert(sortedAddresses[i - 1] <= sortedAddresses[i]);
         }
+    }
+
+    function testCan_uniqArrays(bytes32 seed, uint8 len, uint8 _numUniq) public {
+        vm.assume(len > 0);
+
+        uint8 numUniq = uint8(bound(_numUniq, 1, len) );
+        address[] memory randAddresses = genRandAddressArray(seed, len);
+        address[] memory addressesWithDupes = new address[](randAddresses.length);
+        for (uint32 i = 0; i < addressesWithDupes.length; i++) {
+            addressesWithDupes[i] = address( uint160( randAddresses[i] ) % numUniq );
+        }
+
+        for (uint256 i = 0; i < numUniq; i++) {
+            for (uint256 j = 0; j < addressesWithDupes.length; j++) {
+                if (addressesWithDupes[j] == address(uint160(i))) {
+                    uniqAddresses.push(address(uint160(i)));
+                    break;
+                }
+            }
+        }
+        address[] memory _uniqAddresses = uniqAddresses;
+        assertEq(_uniqueAddresses(_sortAddresses(addressesWithDupes)), _uniqAddresses);
+    }
+
+    function testCan_countUniqueRecipients(bytes32 seed, uint8 len, uint8 _numUniq) public {
+        vm.assume(len > 0);
+
+        uint8 numUniq = uint8(bound(_numUniq, 1, len) );
+        address[] memory randAddresses = genRandAddressArray(seed, len);
+        address[] memory addressesWithDupes = new address[](randAddresses.length);
+        for (uint32 i = 0; i < addressesWithDupes.length; i++) {
+            addressesWithDupes[i] = address( uint160( randAddresses[i] ) % numUniq );
+        }
+
+        for (uint256 i = 0; i < numUniq; i++) {
+            for (uint256 j = 0; j < addressesWithDupes.length; j++) {
+                if (addressesWithDupes[j] == address(uint160(i))) {
+                    uniqAddresses.push(address(uint160(i)));
+                    break;
+                }
+            }
+        }
+        assertEq(_countUniqueRecipients(_sortAddresses(addressesWithDupes)), uniqAddresses.length);
     }
 
     /// -----------------------------------------------------------------------
